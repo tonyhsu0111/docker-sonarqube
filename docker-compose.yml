@@ -1,0 +1,41 @@
+version: "3"
+
+services:
+  sonarqube:
+    image: sonarqube:8.3.1-community
+    container_name: sonarqube
+    restart: always
+    privileged: true
+    ports:
+      - 9000:9000
+    networks:
+      - devel-net
+    environment:
+    - sonar.jdbc.username=sonar
+    - sonar.jdbc.password=sonar
+    - sonar.jdbc.url=jdbc:postgresql://sonarqube_postgres:5432/sonar
+    - sonar.search.javaAdditionalOpts=-Dbootstrap.system_call_filter=false
+    volumes:
+      - ./data/sonarqube/logs:/opt/sonarqube/logs
+      - ./data/sonarqube/data:/opt/sonarqube/data
+      - ./data/sonarqube/extensions:/opt/sonarqube/extensions
+    depends_on:
+      - sonarqube_postgres
+
+  sonarqube_postgres:
+    image: postgres:9.6.18
+    container_name: sonarqube_postgres
+    restart: always
+    privileged: true
+    networks:
+      - devel-net
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+    volumes:
+      - ./data/postgresql/conf:/var/lib/postgresql
+      - ./data/postgresql/data:/var/lib/postgresql/data
+
+networks:
+  devel-net:
+
